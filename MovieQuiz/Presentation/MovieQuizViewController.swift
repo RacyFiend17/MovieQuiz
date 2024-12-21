@@ -79,11 +79,15 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var textLabel: UILabel!
     
+    @IBOutlet weak var noButton: UIButton!
+    @IBOutlet weak var yesButton: UIButton!
+    
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
 
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
+        sender.isEnabled = false
         var rightOrWrong: Bool = false
         
         if questions[currentQuestionIndex].correctAnswer == false {
@@ -98,6 +102,7 @@ final class MovieQuizViewController: UIViewController {
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        sender.isEnabled = false
         var rightOrWrong: Bool = false
         
         if questions[currentQuestionIndex].correctAnswer == true {
@@ -155,13 +160,17 @@ final class MovieQuizViewController: UIViewController {
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.borderWidth = 8 // толщина рамки
-        imageView.layer.cornerRadius = 6 // радиус скругления углов рамки
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        
+        
         
         // запускаем задачу через 1 секунду c помощью диспетчера задач
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
            // код, который мы хотим вызвать через 1 секунду
            self.showNextQuestionOrResults()
+            self.noButton.isEnabled = true
+            self.yesButton.isEnabled = true
         }
     }
     
