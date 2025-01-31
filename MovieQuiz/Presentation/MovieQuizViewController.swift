@@ -1,12 +1,11 @@
 import UIKit
 
-
-
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var alertPresenter: AlertPresenter?
     
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
@@ -56,21 +55,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showResults(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self]
-            _ in
+        let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) {
+            [weak self] in
             guard let self = self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-            questionFactory?.requestNextQuestion()
+            self.questionFactory?.requestNextQuestion()
             self.imageView.layer.borderWidth = 0
         }
-        
-        alert.addAction(action)
+        let alertPresenter = AlertPresenter()
+        let alert = alertPresenter.presentAlert(model: alertModel)
         
         self.present(alert, animated: true, completion: nil)
     }
@@ -93,21 +87,21 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = correctAnswers == questionsAmount ?
-            "Поздравляем, вы ответили на 10 из 10!" :
-            "Вы ответили на \(correctAnswers) из 10, попробуйте ещё раз!"
+            let statisticsService: StatisticServiceProtocol = StatisticsService()
+            statisticsService.storeResult(correct: correctAnswers, total: questionsAmount)
+            
+            let text = "Ваш результат: \(correctAnswers)/10" +
+            "\n Количество сыгранных квизов: \(statisticsService.gamesCount)" +
+            "\n Рекорд: \(statisticsService.bestGame.correct)/\(statisticsService.bestGame.total) \(statisticsService.bestGame.date.dateTimeString)" +
+            "\n Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy))%"
+            
+            
             let viewResults = QuizResultsViewModel(
                 title: "Этот раунд окончен!", text: text,
                 buttonText: "Сыграть ещё раз")
             showResults(quiz: viewResults)
         } else {
             currentQuestionIndex += 1
-//            if let nextQuestion = questionFactory.requestNextQuestion() {
-//                currentQuestion = nextQuestion
-//                let viewModel = convert(model: nextQuestion)
-//
-//                show(quiz: viewModel)
-//            }
             questionFactory?.requestNextQuestion()
             imageView.layer.borderWidth = 0
         }
@@ -119,7 +113,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let questionFactory = QuestionFactory()
         questionFactory.delegate = self
         self.questionFactory = questionFactory
-        
         questionFactory.requestNextQuestion()
     }
     
@@ -137,6 +130,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
 }
+
 
 
 /*
