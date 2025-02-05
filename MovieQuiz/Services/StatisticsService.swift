@@ -8,10 +8,10 @@
 import Foundation
 
 final class StatisticsService: StatisticServiceProtocol {
-    let questionAmount: Int = 10
+    private let questionAmount: Int = 10
     private enum Keys: String {
         case correct
-        case dateBestGame
+        case bestGameDate
         case gamesCount
         case correctAmount
         case accuracy
@@ -41,13 +41,13 @@ final class StatisticsService: StatisticServiceProtocol {
         get {
             let correct = storage.integer(forKey: Keys.correct.rawValue)
             let total = storage.integer(forKey: String(questionAmount))
-            let date = storage.object(forKey: Keys.dateBestGame.rawValue) as? Date ?? Date()
+            let date = storage.object(forKey: Keys.bestGameDate.rawValue) as? Date ?? Date()
             return GameResult(correct: correct, total: total, date: date)
         }
         set {
             storage.set(newValue.correct, forKey: Keys.correct.rawValue)
             storage.set(newValue.total, forKey: String(questionAmount))
-            storage.set(newValue.date, forKey: Keys.dateBestGame.rawValue)
+            storage.set(newValue.date, forKey: Keys.bestGameDate.rawValue)
         }
     }
     
@@ -72,7 +72,7 @@ final class StatisticsService: StatisticServiceProtocol {
         refreshStatistics(correct: count)
     }
     
-    func refreshStatistics(correct count: Int) {
+    private func refreshStatistics(correct count: Int) {
         gamesCount += 1
         correctAnswers += count
     }

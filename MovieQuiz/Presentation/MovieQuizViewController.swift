@@ -17,8 +17,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var correctAnswers = 0
     
     private func isCorrectAnswer(nameOfButtonClicked: String) -> Bool? {
-        let isYesButton = nameOfButtonClicked == "yesButton"
         guard let currentQuestion = currentQuestion else { return nil }
+        let isYesButton = nameOfButtonClicked == "yesButton"
         let isCorrect = currentQuestion.correctAnswer == isYesButton
         
         if isCorrect {
@@ -39,7 +39,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let image = UIImage(named: model.image) ?? UIImage()
+        let image = UIImage(named: model.imageName) ?? UIImage()
         let question = model.text
         let questionNumber: String =
         "\(currentQuestionIndex + 1)/\(questionsAmount)"
@@ -55,8 +55,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showResults(quiz result: QuizResultsViewModel) {
-        let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) {
-            [weak self] in
+        let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
             guard let self = self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
@@ -77,7 +76,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.cornerRadius = 20
         imageView.layer.borderColor =
         isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
             self.showNextQuestionOrResults()
             self.noButton.isEnabled = true
@@ -90,10 +88,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             let statisticsService: StatisticServiceProtocol = StatisticsService()
             statisticsService.storeResult(correct: correctAnswers, total: questionsAmount)
             
-            let text = "Ваш результат: \(correctAnswers)/10" +
-            "\n Количество сыгранных квизов: \(statisticsService.gamesCount)" +
-            "\n Рекорд: \(statisticsService.bestGame.correct)/\(statisticsService.bestGame.total) \(statisticsService.bestGame.date.dateTimeString)" +
-            "\n Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy))%"
+            let text = """
+                Ваш результат: \(correctAnswers)/10
+                Количество сыгранных квизов: \(statisticsService.gamesCount)
+                Рекорд: \(statisticsService.bestGame.correct)/\(statisticsService.bestGame.total) \(statisticsService.bestGame.date.dateTimeString)
+                Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy))%
+                """
             
             
             let viewResults = QuizResultsViewModel(
@@ -121,7 +121,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         guard let question = question else {
             return
         }
-
+        
         currentQuestion = question
         let viewModel = convert(model: question)
         
