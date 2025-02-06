@@ -54,6 +54,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
+        imageView.layer.borderWidth = 0
+        self.noButton.isEnabled = true
+        self.yesButton.isEnabled = true
     }
     
     private func showResults(quiz result: QuizResultsViewModel) {
@@ -80,8 +83,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
             self.showNextQuestionOrResults()
-            self.noButton.isEnabled = true
-            self.yesButton.isEnabled = true
         }
     }
     
@@ -105,7 +106,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else {
             currentQuestionIndex += 1
             questionFactory?.requestNextQuestion()
-            imageView.layer.borderWidth = 0
+
         }
     }
     
