@@ -2,11 +2,12 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
-    private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol?
     private var alertPresenter: AlertPresenter?
+    private let presenter = MovieQuizPresenter()
+    private var correctAnswers = 0
     
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
@@ -14,9 +15,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var noButton: UIButton!
     @IBOutlet private var yesButton: UIButton!
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
-    
-    private var currentQuestionIndex = 0
-    private var correctAnswers = 0
     
     private func isCorrectAnswer(nameOfButtonClicked: String) -> Bool? {
         guard let currentQuestion = currentQuestion else { return nil }
@@ -40,16 +38,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         showAnswerResult(isCorrect: isCorrect)
     }
     
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let image = UIImage(data: model.imageName) ?? UIImage()
-        let question = model.text
-        let questionNumber: String =
-        "\(currentQuestionIndex + 1)/\(questionsAmount)"
-        
-        return QuizStepViewModel(
-            image: image, question: question, questionNumber: questionNumber)
-    }
-    
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
@@ -62,7 +50,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showResults(quiz result: QuizResultsViewModel) {
         let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
             guard let self = self else { return }
-            self.currentQuestionIndex = 0
+            presenter.resetQuestionIndex()
             self.correctAnswers = 0
             self.questionFactory?.requestNextQuestion()
             self.imageView.layer.borderWidth = 0
@@ -87,9 +75,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             let statisticsService: StatisticServiceProtocol = StatisticsService()
-            statisticsService.storeResult(correct: correctAnswers, total: questionsAmount)
+            statisticsService.storeResult(correct: correctAnswers, total: presenter.questionsAmount)
             
             let text = """
                 Ваш результат: \(correctAnswers)/10
@@ -104,7 +92,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 buttonText: "Сыграть ещё раз")
             showResults(quiz: viewResults)
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
 
         }
@@ -128,7 +116,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
         
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
@@ -143,7 +131,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showNetworkError(message: String) {
         let alertModel = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else { return }
-            self.currentQuestionIndex = 0
+            presenter.resetQuestionIndex()
             self.correctAnswers = 0
             self.questionFactory?.requestNextQuestion()
             //    self.imageView.layer.borderWidth = 0
