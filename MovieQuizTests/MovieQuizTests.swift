@@ -29,14 +29,6 @@ struct ArithmeticOperations {
     }
 }
 
-//struct MovieQuizTests {
-//
-//    @Test func example() async throws {
-//        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-//    }
-//
-//}
-
 class MovieQuizTests: XCTestCase {
     func testAddition() throws {
         // Given
@@ -48,7 +40,7 @@ class MovieQuizTests: XCTestCase {
         let expectation = expectation(description: "Wait for completion")
         arithmeticOperations.addition(num1: num1, num2: num2) { result in
             // Then
-            XCTAssertEqual(result, 4)
+            XCTAssertEqual(result, 3)
             expectation.fulfill()
         }
         waitForExpectations(timeout: 2)
