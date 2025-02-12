@@ -25,27 +25,45 @@ final class MovieQuizViewController: UIViewController{
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
         imageView.layer.borderWidth = 0
-        self.noButton.isEnabled = true
-        self.yesButton.isEnabled = true
+        enableButtons()
     }
     
     func showResults(quiz result: QuizResultsViewModel) {
         presenter.makeAndPresentAlertWithResults(result: result)
     }
     
-    func showAnswerResult(isCorrect: Bool) {
+    func enableButtons() {
+        noButton.isEnabled = true
+        yesButton.isEnabled = true
+    }
+    
+    func disableButtons() {
         noButton.isEnabled = false
         yesButton.isEnabled = false
+    }
+    
+    func highlightImageBorder(isCorrectAnswer: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.cornerRadius = 20
         imageView.layer.borderColor =
-        isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
-            self.presenter.showNextQuestionOrResults()
-        }
+        isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        disableButtons()
     }
+    
+//    func showAnswerResult(isCorrect: Bool) {
+//        noButton.isEnabled = false
+//        yesButton.isEnabled = false
+//        imageView.layer.masksToBounds = true
+//        imageView.layer.borderWidth = 8
+//        imageView.layer.cornerRadius = 20
+//        imageView.layer.borderColor =
+//        isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
+//            self.presenter.showNextQuestionOrResults()
+//        }
+//    }
     
     func showLoadingIndicator() {
         activityIndicator.isHidden = false
