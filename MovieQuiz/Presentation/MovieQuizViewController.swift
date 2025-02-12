@@ -16,26 +16,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var yesButton: UIButton!
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
-    private func isCorrectAnswer(nameOfButtonClicked: String) -> Bool? {
-        guard let currentQuestion = currentQuestion else { return nil }
-        let isYesButton = nameOfButtonClicked == "yesButton"
-        let isCorrect = currentQuestion.correctAnswer == isYesButton
-        
-        if isCorrect {
-            correctAnswers += 1
-        }
-        
-        return isCorrect
-    }
-    
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let isCorrect = isCorrectAnswer(nameOfButtonClicked: "noButton") else { return }
-        showAnswerResult(isCorrect: isCorrect)
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let isCorrect = isCorrectAnswer(nameOfButtonClicked: "yesButton") else {return}
-        showAnswerResult(isCorrect: isCorrect)
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
     
     private func show(quiz step: QuizStepViewModel) {
@@ -61,7 +49,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         noButton.isEnabled = false
         yesButton.isEnabled = false
         imageView.layer.masksToBounds = true
@@ -107,6 +95,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         showLoadingIndicator()
         questionFactory?.loadData()
+        
+        presenter.viewController = self
     }
     
     // MARK: - QuestionFactoryDelegate
