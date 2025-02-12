@@ -2,7 +2,7 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController{
     
-    private var statisticService: StatisticServiceProtocol?
+//    private var statisticService: StatisticServiceProtocol?
     private var presenter: MovieQuizPresenter!
     
     @IBOutlet private var imageView: UIImageView!
@@ -43,7 +43,6 @@ final class MovieQuizViewController: UIViewController{
         isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
-            
             self.presenter.showNextQuestionOrResults()
         }
     }
@@ -69,7 +68,6 @@ final class MovieQuizViewController: UIViewController{
         super.viewDidLoad()
         presenter = MovieQuizPresenter(viewController: self)
         imageView.layer.cornerRadius = 20
-        statisticService = StatisticsService()
         presenter.viewController = self
     }
 }
