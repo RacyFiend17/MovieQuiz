@@ -22,9 +22,9 @@ final class MovieQuizPresenter {
             currentQuestionIndex == questionsAmount - 1
         }
         
-        func resetQuestionIndex() {
-            currentQuestionIndex = 0
-        }
+//        func resetQuestionIndex() {
+//            currentQuestionIndex = 0
+//        }
         
         func switchToNextQuestion() {
             currentQuestionIndex += 1
@@ -97,6 +97,36 @@ final class MovieQuizPresenter {
             questionFactory?.requestNextQuestion()
 
         }
+    }
+    
+    func makeAndPresentAlertWithResults(result: QuizResultsViewModel) {
+        let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
+            guard let self = self else { return }
+            restartGame()
+            self.viewController?.setImageBorderToZero()
+        }
+        let alertPresenter = AlertPresenter()
+        let alert = alertPresenter.presentAlert(model: alertModel)
+        
+        self.viewController?.present(alert, animated: true, completion: nil)
+    }
+    
+    func restartGame() {
+        correctAnswers = 0
+        questionFactory?.requestNextQuestion()
+        currentQuestionIndex = 0
+    }
+    
+    func makeAndPresentNetworkError(message: String) {
+        let alertModel = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+            restartGame()
+            //    self.imageView.layer.borderWidth = 0
+        }
+        let alertPresenter = AlertPresenter()
+        let alert = alertPresenter.presentAlert(model: alertModel)
+        
+        self.viewController?.present(alert, animated: true, completion: nil)
     }
     
 }

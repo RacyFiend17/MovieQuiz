@@ -4,9 +4,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private var questionFactory: QuestionFactoryProtocol?
     private var statisticService: StatisticServiceProtocol?
-    private var alertPresenter: AlertPresenter?
+//    private var alertPresenter: AlertPresenter?
     private let presenter = MovieQuizPresenter()
-    private var correctAnswers = 0
     
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
@@ -33,17 +32,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func showResults(quiz result: QuizResultsViewModel) {
-        let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
-            guard let self = self else { return }
-            presenter.resetQuestionIndex()
-            self.correctAnswers = 0
-            self.questionFactory?.requestNextQuestion()
-            self.imageView.layer.borderWidth = 0
-        }
-        let alertPresenter = AlertPresenter()
-        let alert = alertPresenter.presentAlert(model: alertModel)
-        
-        self.present(alert, animated: true, completion: nil)
+        presenter.makeAndPresentAlertWithResults(result: result)
     }
     
     func showAnswerResult(isCorrect: Bool) {
@@ -72,19 +61,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showNetworkError(message: String) {
-        let alertModel = AlertModel(title: "Ошибка", message: message, buttonText: "Попробовать еще раз") { [weak self] in
-            guard let self = self else { return }
-            presenter.resetQuestionIndex()
-            self.correctAnswers = 0
-            self.questionFactory?.requestNextQuestion()
-            //    self.imageView.layer.borderWidth = 0
-        }
-        let alertPresenter = AlertPresenter()
-        let alert = alertPresenter.presentAlert(model: alertModel)
-        
-        self.present(alert, animated: true, completion: nil)
+        presenter.makeAndPresentNetworkError(message: message)
     }
-    
+        
     func didFailToLoadData(with error: Error) {
         showNetworkError(message: error.localizedDescription)
     }
@@ -92,6 +71,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     func didLoadDataFromServer() {
         activityIndicator.isHidden = true
         questionFactory?.requestNextQuestion()
+    }
+    
+    func setImageBorderToZero() {
+        imageView.layer.borderWidth = 0
     }
     
     override func viewDidLoad() {
