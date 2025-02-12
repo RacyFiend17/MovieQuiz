@@ -7,6 +7,18 @@
 
 import UIKit
 
+protocol MovieQuizViewControllerProtocol: AnyObject {
+    func show(quiz step: QuizStepViewModel)
+    func showResults(quiz result: QuizResultsViewModel)
+    
+    func highlightImageBorder(isCorrectAnswer: Bool)
+    
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
+    
+    func showNetworkError(message: String)
+} 
+
 final class MovieQuizPresenter: QuestionFactoryDelegate  {
     
     private var statisticService: StatisticServiceProtocol!
@@ -17,8 +29,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate  {
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     
-    init(viewController: MovieQuizViewController) {
-        self.viewController = viewController
+    init(viewController: MovieQuizViewControllerProtocol) {
+        self.viewController = viewController as? MovieQuizViewController
         
         statisticService = StatisticsService()
         

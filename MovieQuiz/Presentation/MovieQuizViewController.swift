@@ -1,8 +1,7 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController{
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol{
     
-//    private var statisticService: StatisticServiceProtocol?
     private var presenter: MovieQuizPresenter!
     
     @IBOutlet private var imageView: UIImageView!
@@ -50,20 +49,6 @@ final class MovieQuizViewController: UIViewController{
         isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         disableButtons()
     }
-    
-//    func showAnswerResult(isCorrect: Bool) {
-//        noButton.isEnabled = false
-//        yesButton.isEnabled = false
-//        imageView.layer.masksToBounds = true
-//        imageView.layer.borderWidth = 8
-//        imageView.layer.cornerRadius = 20
-//        imageView.layer.borderColor =
-//        isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-//        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
-//            self.presenter.showNextQuestionOrResults()
-//        }
-//    }
     
     func showLoadingIndicator() {
         activityIndicator.isHidden = false
