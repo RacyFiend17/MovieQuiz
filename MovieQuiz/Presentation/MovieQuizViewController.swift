@@ -32,7 +32,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         self.yesButton.isEnabled = true
     }
     
-    private func showResults(quiz result: QuizResultsViewModel) {
+    func showResults(quiz result: QuizResultsViewModel) {
         let alertModel = AlertModel(title: result.title, message: result.text, buttonText: result.buttonText) { [weak self] in
             guard let self = self else { return }
             presenter.resetQuestionIndex()
@@ -54,46 +54,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.cornerRadius = 20
         imageView.layer.borderColor =
         isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
-            self.showNextQuestionOrResults()
+            self.presenter.questionFactory = self.questionFactory
+            presenter.showNextQuestionOrResults()
         }
-    }
-    
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            let statisticsService: StatisticServiceProtocol = StatisticsService()
-            statisticsService.storeResult(correct: correctAnswers, total: presenter.questionsAmount)
-            
-            let text = """
-                Ваш результат: \(correctAnswers)/10
-                Количество сыгранных квизов: \(statisticsService.gamesCount)
-                Рекорд: \(statisticsService.bestGame.correct)/\(statisticsService.bestGame.total) \(statisticsService.bestGame.date.dateTimeString)
-                Средняя точность: \(String(format: "%.2f", statisticsService.totalAccuracy))%
-                """
-            
-            
-            let viewResults = QuizResultsViewModel(
-                title: "Этот раунд окончен!", text: text,
-                buttonText: "Сыграть ещё раз")
-            showResults(quiz: viewResults)
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-
-        }
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        imageView.layer.cornerRadius = 20
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        statisticService = StatisticsService()
-        
-        showLoadingIndicator()
-        questionFactory?.loadData()
-        
-        presenter.viewController = self
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -127,6 +92,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     func didLoadDataFromServer() {
         activityIndicator.isHidden = true
         questionFactory?.requestNextQuestion()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        imageView.layer.cornerRadius = 20
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        statisticService = StatisticsService()
+        
+        showLoadingIndicator()
+        questionFactory?.loadData()
+        
+        presenter.viewController = self
     }
 }
 
