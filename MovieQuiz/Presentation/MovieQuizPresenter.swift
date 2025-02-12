@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate  {
     
     var currentQuestion: QuizQuestion?
     weak var viewController: MovieQuizViewController?
@@ -16,19 +16,23 @@ final class MovieQuizPresenter {
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
     
+    func didFailToLoadData(with error: any Error) {
+        let message = error.localizedDescription
+        viewController?.showNetworkError(message: message)
+    }
     
     func isLastQuestion() -> Bool {
-            currentQuestionIndex == questionsAmount - 1
-        }
-        
-//        func resetQuestionIndex() {
-//            currentQuestionIndex = 0
-//        }
-        
-        func switchToNextQuestion() {
-            currentQuestionIndex += 1
-        }
+        currentQuestionIndex == questionsAmount - 1
+    }
+    
+    func switchToNextQuestion() {
+        currentQuestionIndex += 1
+    }
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         let image = UIImage(data: model.imageName) ?? UIImage()
@@ -69,7 +73,6 @@ final class MovieQuizPresenter {
         
         currentQuestion = question
         let viewModel = convert(model: question)
-        
         DispatchQueue.main.async { [weak self] in
             self?.viewController?.show(quiz: viewModel)
         }
@@ -95,7 +98,7 @@ final class MovieQuizPresenter {
         } else {
             self.switchToNextQuestion()
             questionFactory?.requestNextQuestion()
-
+            
         }
     }
     
@@ -127,6 +130,14 @@ final class MovieQuizPresenter {
         let alert = alertPresenter.presentAlert(model: alertModel)
         
         self.viewController?.present(alert, animated: true, completion: nil)
+    }
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
     }
     
 }

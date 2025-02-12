@@ -1,11 +1,9 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController{
     
-    private var questionFactory: QuestionFactoryProtocol?
     private var statisticService: StatisticServiceProtocol?
-//    private var alertPresenter: AlertPresenter?
-    private let presenter = MovieQuizPresenter()
+    private var presenter: MovieQuizPresenter!
     
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
@@ -45,32 +43,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in                                                                  guard let self else { return }
-            self.presenter.questionFactory = self.questionFactory
-            presenter.showNextQuestionOrResults()
+            
+            self.presenter.showNextQuestionOrResults()
         }
     }
     
-    // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        presenter.didReceiveNextQuestion(question: question)
-    }
-    
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
-    private func showNetworkError(message: String) {
-        presenter.makeAndPresentNetworkError(message: message)
-    }
-        
-    func didFailToLoadData(with error: Error) {
-        showNetworkError(message: error.localizedDescription)
+    func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
     }
     
-    func didLoadDataFromServer() {
-        activityIndicator.isHidden = true
-        questionFactory?.requestNextQuestion()
+    func showNetworkError(message: String) {
+        presenter.makeAndPresentNetworkError(message: message)
     }
     
     func setImageBorderToZero() {
@@ -79,14 +67,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        presenter = MovieQuizPresenter(viewController: self)
         imageView.layer.cornerRadius = 20
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticsService()
-        
-        showLoadingIndicator()
-        questionFactory?.loadData()
-        
         presenter.viewController = self
     }
 }
