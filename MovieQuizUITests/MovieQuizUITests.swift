@@ -29,11 +29,8 @@ class MovieQuizUITests: XCTestCase {
     
     @MainActor
     func testExample() throws {
-        // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
     func testYesButton() {
@@ -71,14 +68,16 @@ class MovieQuizUITests: XCTestCase {
         XCTAssertEqual(indexLabel.label, "2/10")
     }
     
+    // Проблема была, полагаю, в том, что я не задал Identifier алерте, я это исправил в AlertPresenter. Но в некоторых случаях до алерта не доходило из-за того, что слишком долго грузит с сервера данные (например, с впн у меня даже при sleep(4) не успевало прогрузиться), поэтому сделал sleep(5). Понимаю, что это оч долго теперь времени занимает, но зато даже с впн проходит.
     func testGameFinish() {
-        sleep(2)
+        sleep(5)
         for _ in 1...10 {
             app.buttons["No"].tap()
-            sleep(2)
+            sleep(5)
         }
 
         let alert = app.alerts["Game results"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 2), "Алерт не появился")
         
         XCTAssertTrue(alert.exists)
         XCTAssertTrue(alert.label == "Этот раунд окончен!")
@@ -86,10 +85,10 @@ class MovieQuizUITests: XCTestCase {
     }
 
     func testAlertDismiss() {
-        sleep(2)
+        sleep(5)
         for _ in 1...10 {
             app.buttons["No"].tap()
-            sleep(2)
+            sleep(5)
         }
         
         let alert = app.alerts["Game results"]
